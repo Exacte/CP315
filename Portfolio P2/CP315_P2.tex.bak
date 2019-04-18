@@ -1,0 +1,258 @@
+\documentclass[12pt]{article}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\setcounter{section}{5}
+
+\begin{document}
+\title{CP315 - Portfolio Part 2}
+\date{March 31, 2017}
+\author{Mason Cooper\\ Wilfrid Laurier University}
+\maketitle
+\clearpage
+\tableofcontents
+\clearpage
+
+\section{Eigenvalue/Eigenvector Problems}
+The following is my code for Faddeev-Leverrier scheme:\\
+
+$Faddeev:=proc(A)$\\
+$local(i, n, p, P, l);$\\
+$n := RowDimension(A);$\\
+$P := A;$\\
+$p := Trace(A);$\\
+$l := (-lambda)^n+p*lambda^(n-1);$\\
+$for i from 2 to n do:$\\
+$P := Multiply(A, P-p*IdentityMatrix(n));$\\
+$p := Trace(P)/i;$\\
+$l := l+p*lambda^(n-i);$\\
+$end do;$\\
+$return(-l);$\\
+$end proc$\\
+
+
+Results:\\
+Faddeev(HilbertMatrix(5))
+$$lambda^5-(563/315)*lambda^4+(735781/2116800)*lambda^3-(852401/222264000)*lambda^2$$
+$$+(61501/53343360000)*lambda-1/266716800000$$\\
+
+Proof all eigenvalues are positive:\\
+$v:=evalf(solve(CharacteristicPolynomial(HilbertMatrix(5), lambda), lambda))$\\
+$0.3287928772e-5, 0.3058980402e-3, 0.1140749162e-1, .2085342186, 1.567050691$\\
+
+Sum of eigenvalues:\\
+$evalf(Sum(v[i], i = 1 .. 5))$\\
+$1.787301587$\\
+
+Product of eigenvalues:\\
+$product(v[i], i = 1 .. 5)$\\
+$3.749295133*10^(-12)$\\
+\clearpage
+My code for Cholesky decomposition,
+
+$cholesky:=proc(A)$\\
+$local(n, m, i, j, B);$\\
+$n := RowDimension(A);$\\
+$m := ColumnDimension(A);$\\
+$B := Matrix(n, m);$\\
+$ for i from 1 to m do;$\\
+$for j from 1 to n do:$\\
+$ if j<i then;$\\
+$B[i, j] := (A[i, j]-add(B[i, x]*B[j, x], x = 1 .. j-1))/B[j, j];$\\
+$elif i= j then;$\\
+$B[i, j] := sqrt(A[j, j]-add(B[i, x]^2, x = 1 .. i-1));$\\
+$end if;$\\
+$end do;$\\
+$end do;$\\
+$return(B);$\\
+$end proc$\\
+
+Results,\\
+$cholesky(HilbertMatrix(5))$\\
+$$\begin{bmatrix}
+1 & 0 & 0 & 0 & 0\\
+1/2 & (1/6)*\sqrt{3} & 0 & 0 & 0\\
+1/3 & (1/6)*\sqrt{3} & (1/30)*\sqrt{5} & 0 & 0\\
+1/4 & (3/20)*\sqrt{3} & (1/20)*\sqrt{5}  & (1/140)*\sqrt{7}  & 0\\
+1/5 & (2/15)*\sqrt{3} & (2/35)*\sqrt{5}  & (1/70)*\sqrt{7}  & 1/210\\
+\end{bmatrix}$$\\
+
+$Multiply(cholesky(HilbertMatrix(5)), Transpose(cholesky(HilbertMatrix(5))))$\\
+$$\begin{bmatrix}
+1 & 1/2 & 1/3 & 1/4 & 1/5\\
+1/2 & 1/3 & 1/4 & 1/5 & 1/6\\
+1/3 & 1/4 & 1/5 & 1/6 & 1/7\\
+1/4 & 1/5 & 1/6  & 1/7  & 1/8\\
+1/5 & 1/6 & 1/7  & 1/8  & 1/9\\
+\end{bmatrix}$$\\
+\section{Interpolation, Curve Fitting}
+\subsection{Vandermonde-based collocation}
+My Vandermonde-based collocation code,\\
+
+$vandermode:=proc(xy)$\\
+$local(n, y, a, V, inv, i, p);$\\
+$n := numelems(xy);$\\
+$V := VandermondeMatrix(Transpose(xy)[1]);$\\
+$y := Column(VandermondeMatrix(Transpose(xy)[2], 7), 2);$\\
+$inv := MatrixInverse(V);$\\
+$a := Multiply(inv, y);$\\
+$p := 0;$\\
+$or i from 1to n do:$\\
+$p := p+a[i]*x^i;$\\
+$end do;$\\
+$return( p);$\\
+$end proc$\\
+
+\subsection{Lagrange interpolation}
+My Lagrange Interpolation code,\\
+
+$lagrange:=proc(xy)$\\
+$local(j, k, n, X, Y);$\\
+$n := numelems(xy)-1;$\\
+$X[k] := Transpose(xy)[[1]][1, k+1];$\\
+$Y[k] := Transpose(xy)[[2]][1, k+1];$\\
+$X[j] := Transpose(xy)[[1]][1, j+1];$\\
+$return(evalf(Sum(Y[k]*(product((x-X[j])/(X[k]-X[j]), j = 0 .. k-1))*(product((x-X[j])/(X[k]-X[j]), j = k+1 .. n)), k = 0 .. n)));$\\
+$end proc$\\
+\clearpage
+\subsection{Comparison}
+\clearpage
+\setcounter{section}{8}
+\section{Numerical Integration I, Newton-Cotes}
+My code for Trapezoidal Rule,\\
+
+$TrapRule:=proc(a,b,n,f)$\\
+$local(h, k);$\\
+$h := (b-a)/n;$\\
+$return(evalf((1/2)*h*(f(a)+f(b)+2*(sum(f(h*k+a), k = 1 .. n-1)))));$\\
+$end proc$\\
+
+
+My code for Simpson's 1/3 Rule,\\
+
+$simpsonsRule:=proc(f,a,b,n)$\\
+$local(h, i, q);$\\
+$h := (b-a)/n;$\\
+$q := evalf((1/3)*h*(f(a)+4*(Sum(f((2*i-1)/n), i = 1 .. (1/2)*n))+2*(Sum(f(2*i/n), i = 1 .. (1/2)*n))+f(b)));$\\
+$return(q);$\\
+$end proc$\\
+
+Results for Trapezoidal Rule,
+$TrapRule(0, 1, 100, (x^2+x+1)/(x^4+x^3+x^2+x+1))$\\
+$0.8648000930$\\
+
+$TrapRule(0, (1/2)*Pi, 1, sin(theta)^3/(sin(theta)^3+cos(theta)^3))$\\
+$0.7853981635$\\
+
+$TrapRule(-Pi, Pi, 3000, cos(x^2))$\\
+$1.131389003$\\
+
+
+Results for Simpson's 1/3 Rule,
+$simpsonsRule((x^2+x+1)/(x^4+x^3+x^2+x+1), 0, 1, 100)$\\
+$0.8688062664$\\
+
+$simpsonsRule(sin(theta)^3/(sin(theta)^3+cos(theta)^3), 0, (1/2)*Pi, 1000)$\\
+$0.3842072117$\\
+
+$simpsonsRule(cos(x^2), -Pi, Pi, 3000)$\\
+$5.681712088$\\
+\section{Numerical Integration II, Romberg}
+\subsection{Romberg - code}
+My code for bisection method,\\
+
+$romberg := proc(f, a, b, N) $\\
+$local(R, h, k, row, col);$\\
+$R := array(0 .. N, 0 .. N);$\\
+$for row from 1 to N do;$\\
+$while \frac{1}{10000} < (1/2)*b-(1/2)*a do$\\
+$h := (1/2)*h;$\\
+$R[row, 0] := evalf(.5*R[row-1, 0]+sum(h*f(a+(2*k-1)*h), k = 1 .. 2^(row-1)));$\\
+$for col from 1 to row do;$\\
+$R[row, col] := (4^col*R[row, col-1]-R[row-1, col-1])/(4^col-1);$\\
+$end do;$\\
+$end do;$\\
+$for row from 0 to N do$\\
+$ for col from 0 to row do$\\
+
+$end do;$\\
+
+$end do;$\\
+$return(R[N, N])$\\
+$end proc$\\
+\clearpage
+\subsection{Romberg - Questions}
+For $1/(1+x)$,\\
+$romberg(f, 0, 1, 7)$\\
+$.6931471806$, 7 rows needed.\\
+
+
+For $sin(theta)^3/(sin(theta)^3+cos(theta)^3)$,\\
+$0.7853981635$, Only one row needed.\\
+
+\clearpage
+\section{Numerical Solution of ODE's, IVP's}
+\subsection{One Equation}
+My Euler's method,\\
+
+$eulers:=proc(f,a,b,Y,h)$\\
+$local(pts, n, i, y, t)$\\
+$Digits := 5;$\\
+$y := Y;$\\
+$pts := [[a, y]];$\\
+$n := (b-a)/h;$\\
+$for i from a+1 to n do;$\\
+$t := h*i;$\\
+$y := evalf(y+h*f(t, y));$\\
+$pts := [op(pts), [t, y]];$\\
+$end do;$\\
+$return(pts);$\\
+$end proc$\\
+\clearpage
+
+My Heun's method,
+
+$heuns:=proc(f,a,b,Y,h)$\\
+$local(y, pts, n, i, t);$\\
+$Digits := 5;$\\
+$y := Y;$\\
+$pts := [[a, y]];$\\
+$n := (b-a)/h;$\\
+$for i from a+1 to n do$\\
+$t := h*i;$\\
+$y := evalf(y+(1/2)*h*(f(t, y)+f(t+1, y+h*f(t, y))));$\\
+$pts := [op(pts), [t, y]];$\\
+$end do;$\\
+$return(pts)$\\
+$end proc$\\
+
+
+My Runge-Kutta,
+
+$rungekutta:=proc(f,a,b,Y,h)$\\
+$local(y, pts, n, i, t, k1, k2, k3, k4);$\\
+$Digits := 5;$\\
+$y := Y;$\\
+$pts := [[a, y]];$\\
+$n := (b-a)/h;$\\
+$for i from a+1 to n do$\\
+$t := h*i;$\\
+$k1 := h*f(t, y);$\\
+$k2 := h*f(t+(1/2)*h, y+(1/2)*k1);$\\
+$k3 := h*f(t+(1/2)*h, y+(1/2)*k2);$\\
+$k4 := h*f(t+h, y+k3);$\\
+$y := evalf(y+1/6*(k1+2*k2+2*k3+k4));$\\
+$pts := [op(pts), [t, y]];$\\
+$end do;$\\
+$return(pts)$\\
+$end proc$\\
+\subsection{Results}
+
+Euler's Output,\\
+$[[0, 1], [0.2e-1, .91922], [0.4e-1, .84576], [0.6e-1, .77892], [0.8e-1, .71807], [.10, .66264], [.12, .61211], [.14, .56601], [.16, .52393], [.18, .48549], [.20, .45035], [.22, .41819], [.24, .38875], [.26, .36176], [.28, .33701], [.30, .31429], [.32, .29341], [.34, .27420], [.36, .25652], [.38, .24022], [.40, .22518], [.42, .21130], [.44, .19847], [.46, .18659], [.48, .17559], [.50, .16539], [.52, .15592], [.54, .14712], [.56, .13893], [.58, .13131], [.60, .12420], [.62, .11757], [.64, .11137], [.66, .10558], [.68, .10016], [.70, 0.95076e-1], [.72, 0.90307e-1], [.74, 0.85829e-1], [.76, 0.81620e-1], [.78, 0.77661e-1], [.80, 0.73933e-1], [.82, 0.70419e-1], [.84, 0.67104e-1], [.86, 0.63975e-1], [.88, 0.61018e-1], [.90, 0.58222e-1], [.92, 0.55576e-1], [.94, 0.53070e-1], [.96, 0.50695e-1], [.98, 0.48443e-1], [1.00, 0.46305e-1]]$\\
+
+Heun's Output,\\
+$[[0, 1], [0.2e-1, .91494], [0.4e-1, .83758], [0.6e-1, .76719], [0.8e-1, .70313], [.10, .64481], [.12, .59170], [.14, .54331], [.16, .49921], [.18, .45901], [.20, .42234], [.22, .38888], [.24, .35834], [.26, .33045], [.28, .30497], [.30, .28168], [.32, .26038], [.34, .24089], [.36, .22305], [.38, .20670], [.40, .19172], [.42, .17798], [.44, .16537], [.46, .15379], [.48, .14314], [.50, .13335], [.52, .12434], [.54, .11604], [.56, .10839], [.58, .10134], [.60, 0.94831e-1], [.62, 0.88818e-1], [.64, 0.83259e-1], [.66, 0.78115e-1], [.68, 0.73351e-1], [.70, 0.68936e-1], [.72, 0.64840e-1], [.74, 0.61037e-1], [.76, 0.57503e-1], [.78, 0.54216e-1], [.80, 0.51156e-1], [.82, 0.48304e-1], [.84, 0.45645e-1], [.86, 0.43163e-1], [.88, 0.40844e-1], [.90, 0.38675e-1], [.92, 0.36645e-1], [.94, 0.34744e-1], [.96, 0.32961e-1], [.98, 0.31288e-1], [1.00, 0.29717e-1]]$\\
+
+Runge-Kutta Output,\\
+$[[0, 1], [0.2e-1, .92276], [0.4e-1, .85216], [0.6e-1, .78759], [0.8e-1, .72853], [.10, .67448], [.12, .62496], [.14, .57958], [.16, .53797], [.18, .49978], [.20, .46471], [.22, .43249], [.24, .40287], [.26, .37562], [.28, .35053], [.30, .32741], [.32, .30609], [.34, .28642], [.36, .26825], [.38, .25145], [.40, .23590], [.42, .22151], [.44, .20817], [.46, .19579], [.48, .18429], [.50, .17361], [.52, .16367], [.54, .15442], [.56, .14580], [.58, .13778], [.60, .13028], [.62, .12327], [.64, .11673], [.66, .11061], [.68, .10487], [.70, 0.99492e-1], [.72, 0.94444e-1], [.74, 0.89702e-1], [.76, 0.85245e-1], [.78, 0.81052e-1], [.80, 0.77104e-1], [.82, 0.73384e-1], [.84, 0.69876e-1], [.86, 0.66566e-1], [.88, 0.63440e-1], [.90, 0.60486e-1], [.92, 0.57691e-1], [.94, 0.55046e-1], [.96, 0.52542e-1], [.98, 0.50170e-1], [1.00, 0.47921e-1]]$\\
+\end{document}

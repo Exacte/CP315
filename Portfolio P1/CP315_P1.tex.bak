@@ -1,0 +1,280 @@
+\documentclass[12pt]{article}
+\usepackage{hyperref}
+\usepackage{amsmath}
+
+\begin{document}
+\title{CP315 - Portfolio Part 1}
+\date{February 26, 2017}
+\author{Mason Cooper\\ Wilfrid Laurier University}
+\maketitle
+\tableofcontents
+
+\section{Horner's Scheme}
+The following is my code for Horner's scheme:\\
+
+$horner := proc (f, x)$\\
+$local d, h; h := f;$\\
+$d := degree(h);$\\
+$numapprox[hornerform](select(u->degree(u, x) <= d end proc, h), x)$\\
+$end proc$\\
+\begin{itemize}
+\item $x^8-x^7+x^4-x^3+x+1$
+$$1+(1+(-1+(1+(-1+x)x^3)x)8x^2)x$$
+\item $x^{400}-x^{300}+x^{200}-x^{100}+1$
+$$1+(-1+(1+(x^1{00}-1)x^{100})x^{100})x^{100}$$
+\item $x^14+x^11+x^8+x^5$
+$$(1+(1+(x^3+1)x^3)x^3)x^5$$
+\end{itemize}
+\section{Taylor's theorem}
+My Taylor's theorem code,\\
+
+$mytaylor := proc (f, x0, d) local r, i;$\\
+$r := eval(f, x = x0);$\\
+$for i to d  do  r := r+(eval(diff(f, xi),$\\
+$x = x0))*(x-x0)^i/factorial(i)$\\
+$end do$\\
+$end proc$\\
+
+The following is the output from my code for Taylor's theorem and the output from Maple's built in Taylor command for comparison:\\
+
+\begin{itemize}
+\item $f(x)=cos(x)$, up to degree $k=10$, around $x_0=0$
+$$1-\frac{1}{2}x^2+\frac{1}{24}x^4-\frac{1}{720}x^6+\frac{1}{40320}x^8-\frac{1}{3628800}x^{10}$$
+
+$$1-\frac{1}{2}x^2+\frac{1}{24}x^4-\frac{1}{720}x^6+\frac{1}{40320}x^8+O(x^{10})$$\\
+
+\item $f(x)=e^{x}$, up to degree $k=10$, around $x_0=0$
+$$1+ln(e)x+\frac{1}{2}ln(e)^2x^2+\frac{1}{6}ln(e)^3x^3+\frac{1}{24}ln(e)^4x^4+\frac{1}{120}ln(e)^5x^5\\$$
+$$+\frac{1}{720}ln(e)^6x^6+\frac{1}{5040}ln(e)^7x^7+\frac{1}{40320}ln(e)^8x^8+\frac{1}{3628800}ln(e)^9x^9+\frac{1}{3628800}ln(e)^{10}x^{10}$$
+
+$$1+ln(e)x+\frac{1}{2}ln(e)^2x^2+\frac{1}{6}ln(e)^3x^3+\frac{1}{24}ln(e)^4x^4+\frac{1}{120}ln(e)^5x^5\\$$
+$$+\frac{1}{720}ln(e)^6x^6+\frac{1}{5040}ln(e)^7x^7+\frac{1}{40320}ln(e)^8x^8+\frac{1}{3628800}ln(e)^9x^9+O(x^{10})$$
+\end{itemize}
+\section{Polynomials}
+My code for sign change,\\
+
+$signchange := proc (f)$\\
+$local max, min, i, h, result, t, s; h := f;$\\
+$result := [];$\\
+$max := 100;$\\
+$min := -100;$\\
+$t := eval(f, x = min);$\\
+$for i from min to max do$\\
+$s := eval(f, x = i);$\\
+$if s = 0 then$\\
+$result := [op(result), [i]];$\\
+$s := eval(f, x = i+1);$\\
+$if 0 < t and 0 < s or t < 0 and s < 0 then$\\
+$result := [op(result), [i]]$\\
+$else$\\
+$t := s$\\
+$end if$\\
+$elif 0 < t and s < 0 then$\\
+$result := [op(result), [i-1, i]];$\\
+$t := s$\\
+$elif t < 0 and 0 < s then$\\
+$result := [op(result), [i-1, i]];$\\
+$t := s$\\
+$end if$\\
+$end do;$\\
+$return result$\\
+$end proc$\\
+\\\\\\\\\\\\\\\\
+My Vieta formulae,\\
+
+$vieta := proc (f, i)$\\
+$local j, d, a, h, s;$\\
+$h := f;$\\
+$a := [];$\\
+$d := degree(f);$\\
+$for j from 0 to d do$\\
+$a := [op(a), coeff(h, x, j)]$\\
+$end do;$\\
+$d := d+1;$\\
+$s := (-1)^i*\frac{a[d-i]}{a[d]};$\\
+$return s$\\
+$end proc$\\
+
+With my sign change code, the function $x^3-44x^2+564x-1728$ had sign changes at,
+$$[[4, 5], [18], [21, 22]]$$
+Using Vieta's formulae I was able to compute the following,
+$$p_1+p_2+p_3 = 44$$
+$$p_1p_2p_3 = 1728$$
+$$p_1p_2+p_1p_3 +p_2p_3 = 564$$
+$$p_1^2+p_2^2+p_3^2 = 808$$
+$$p_1^3+p_2^3+p_3^3 = 15920$$
+$$\frac{1}{p_1^2}+\frac{1}{p_2^2}+\frac{1}{p_3^2} = 808$$
+\\\\\\\\
+\section{Equation Solving}
+\subsection{Bisection method}
+My code for bisection method,\\
+
+$bisection := proc (l, h, f)$\\
+$local a, b, c, m, n;$\\
+$Digits := 4;$\\
+$a := l;$\\
+$b := h;$\\
+$while \frac{1}{10000} < (1/2)*b-(1/2)*a do$\\
+$c := \frac{a+b}{2};$\\
+$m := evalf(eval(f, x = c));$\\
+$n := evalf(eval(f, x = a));$\\
+$if m = 0 then$\\
+$return r = c$\\
+$end if;$\\
+$if n*m < 0 then b := c$\\
+$else$\\
+$a := c$\\
+$end if$\\
+$end do;$\\
+$return r = evalf(\frac{a+b}{2})$\\
+$end proc$\\
+
+The following is output of my code for bisection method,
+\begin{itemize}
+\item $f(x) = x^3+x-1, x \in [0,1]$
+$$r = .6823$$
+\item $f(x) = cosx - x, x \in [0,1]$
+$$r = .7391$$\\
+\end{itemize}
+\subsection{Fixed-point iteration method}
+My code for Fixed-point iteration method,\\
+
+$FPI := proc (f, x0, max)$\\
+$local p0, p1, i;$\\
+$Digits := 9;$\\
+$p0 := evalf(x0);$\\
+$p1 := p0;$\\
+$for i from 0 to max do$\\
+$p0 := p1;$\\
+$p1 := eval(f, x = p0);$\\
+$i := i+1$\\
+$end do;$\\
+$return p1$\\
+$end proc$\\
+
+The following is output of my code for Fixed-point iteration method,
+\begin{itemize}
+\item $g(x) = \frac{(x+\frac{2}{x})}{2}$
+$$1.41421356$$
+\item $x^3 = 2*x+2$
+$$1.76931316$$
+\end{itemize}
+\subsection{Newton's method}
+My code for Newton's method,\\
+
+$newton := proc (f, x0, max)$\\
+$local p0, p1, i;$\\
+$Digits := 9;$\\
+$h := f;$\\
+$i := 0;$\\
+$p0 := evalf(x0);$\\
+$p1 := p0;$\\
+$while i < max do$\\
+$p0 := p1;$\\
+$p1 := p0-(\frac{eval(h, x = p0))}{(eval((h', x), x = p0))};$\\
+$i := i+1$\\
+$end do;$\\
+$return p1$\\
+$end proc$\\
+
+The following is output of my code for Newton's method,
+\begin{itemize}
+\item $f(x) = x^3+x-1, x_0 = 0.1$
+$$0.682327804$$
+\item $x^2+1 = 0, x_0 = 2]$
+$$2.40087675$$
+\end{itemize}
+\section{Systems of Linear Equations}
+\subsection{Gauss Elimination}
+My code for Gauss Elimination method,\\
+
+$GaussElimination := proc (A)$\\
+$local B, X, i, j, k, d, c;$\\
+$B := A;$\\
+$d := Dimension(B);$\\
+$X := [seq(x[i], i = 1 .. d[1])];$\\
+$for j to d[1] do for i to d[1] do$\\
+$if j < i then$\\
+$c := \frac{B[i, j]}{B[j, j]};$\\
+$for k to d[2] do$\\
+$B[i, k] := B[i, k]-c*B[j, k]$\\
+$end do$\\
+$end if$\\
+$end do$\\
+$end do;$\\
+$X[d[1]] := \frac{B[d[1], d[1]+1]}{B[d[1], d[1]]};$\\
+$for i from d[1]-1 by -1 to 1 do$\\
+$c := 0;$\\
+$for j from i+1 to d[1] do$\\
+$c := c+B[i, j]*X[j]$\\
+$end do;$\\
+$X[i] := \frac{B[i, d[2]]-c}{B[i, i]}$\\
+$end do;$\\
+$return X$\\
+$end proc$\\
+
+The following is output of my code for Gauss Elimination,
+$$[1, 2, 4]$$
+\subsection{Gauss-Jordan Elimination}
+My code for Gauss-Jordan Elimination method,\\
+
+$GaussJordan := proc (A, n)$\\
+$local i, j, B, k;$\\
+$B := A;$\\
+$for i to n do$\\
+$for j from i+1 to n do$\\
+$if abs(B[i, i]) < abs(B[j, i])$\\
+$then B[i, j] = B[j, i]$\\
+$end if$\\
+$end do;$\\
+$B[i] := \frac{B[i]}{B[i, i]};$\\
+$for k to n do$\\
+$if k <> i$\\
+$then B[k] := -B[i]*B[k, i]+B[k]$\\
+$end if$\\
+$end do$\\
+$end do;$\\
+$return B$\\
+$end proc$\\
+\\\\
+The following is output of my code for Gauss-Jordan Elimination,
+$$\begin{bmatrix}
+1 & 0 & 0 & 1\\
+0 & 1 & 0 & 2\\
+0 & 0 & 1 & 4
+\end{bmatrix}$$
+\subsection{The Hilbert matrix}
+The following is output of my code for Gauss  Elimination and Gauss-Jordan Elimination on the Hilbert matrix,\\
+
+Gauss Elimination, $H_5 \cdot \vec{x} = \vec{1}$
+$$Determinant is, \frac{1}{266716800000}$$
+$$[5, -120, 630, -1120, 630]$$
+
+Gauss-Jordan Elimination, $H_5 \cdot \vec{x} = \vec{1}$ and Determinant,
+$$\begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 5\\
+0 & 1 & 0 & 0 & 0 & -120\\
+0 & 0 & 1 & 0 & 0 & 630\\
+0 & 0 & 0 & 1 & 0 & -1120\\
+0 & 0 & 0 & 0 & 1 & 630\\
+\end{bmatrix}$$
+
+Gauss-Jordan Elimination, $H_5^{-1}$
+$$\begin{bmatrix}
+1 & 0 & 0 & 0 & 0 & 25 & -300 & 1050 & -1400 & 630\\
+0 & 1 & 0 & 0 & 0 & -300 & 4800 & -18900 & 26880 & -12600\\
+0 & 0 & 1 & 0 & 0 & 1050 & -18900 & 79380 & -117600 & 56700\\
+0 & 0 & 0 & 1 & 0 & -1400 & 26880 & -117600 & 179200 & -88200\\
+0 & 0 & 0 & 0 & 1 & 630 & -12600 & 56700 & -88200 & 44100\\
+\end{bmatrix}$$
+\\\\\\\\\\\\\\
+Condition Number,\\
+
+1-Form\\
+$Multiply(MatrixNorm(H, 1), MatrixNorm(MatrixInverse(H), 1));$\\
+$$943656$$\\
+
+Frobenius\\
+$Multiply(MatrixNorm(H, Frobenius), MatrixNorm(MatrixInverse(H), Frobenius))$\\
+$$\frac{1}{504}\sqrt(3700542505)\sqrt(15871330)$$
+\end{document}

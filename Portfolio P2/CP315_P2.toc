@@ -1,0 +1,12 @@
+\contentsline {section}{\numberline {6}Eigenvalue/Eigenvector Problems}{3}{section.6}
+\contentsline {section}{\numberline {7}Interpolation, Curve Fitting}{5}{section.7}
+\contentsline {subsection}{\numberline {7.1}Vandermonde-based collocation}{5}{subsection.7.1}
+\contentsline {subsection}{\numberline {7.2}Lagrange interpolation}{5}{subsection.7.2}
+\contentsline {subsection}{\numberline {7.3}Comparison}{6}{subsection.7.3}
+\contentsline {section}{\numberline {9}Numerical Integration I, Newton-Cotes}{7}{section.9}
+\contentsline {section}{\numberline {10}Numerical Integration II, Romberg}{8}{section.10}
+\contentsline {subsection}{\numberline {10.1}Romberg - code}{8}{subsection.10.1}
+\contentsline {subsection}{\numberline {10.2}Romberg - Questions}{9}{subsection.10.2}
+\contentsline {section}{\numberline {11}Numerical Solution of ODE's, IVP's}{10}{section.11}
+\contentsline {subsection}{\numberline {11.1}One Equation}{10}{subsection.11.1}
+\contentsline {subsection}{\numberline {11.2}Results}{11}{subsection.11.2}

@@ -1,0 +1,11 @@
+\BOOKMARK [1][-]{section.1}{Horner's Scheme}{}% 1
+\BOOKMARK [1][-]{section.2}{Taylor's theorem}{}% 2
+\BOOKMARK [1][-]{section.3}{Polynomials}{}% 3
+\BOOKMARK [1][-]{section.4}{Equation Solving}{}% 4
+\BOOKMARK [2][-]{subsection.4.1}{Bisection method}{section.4}% 5
+\BOOKMARK [2][-]{subsection.4.2}{Fixed-point iteration method}{section.4}% 6
+\BOOKMARK [2][-]{subsection.4.3}{Newton's method}{section.4}% 7
+\BOOKMARK [1][-]{section.5}{Systems of Linear Equations}{}% 8
+\BOOKMARK [2][-]{subsection.5.1}{Gauss Elimination}{section.5}% 9
+\BOOKMARK [2][-]{subsection.5.2}{Gauss-Jordan Elimination}{section.5}% 10
+\BOOKMARK [2][-]{subsection.5.3}{The Hilbert matrix}{section.5}% 11
